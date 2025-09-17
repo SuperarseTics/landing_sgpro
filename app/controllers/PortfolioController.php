@@ -2,19 +2,30 @@
 // app/controllers/PortfolioController.php
 
 require_once __DIR__ . '/../models/PortfolioModel.php';
+require_once __DIR__ . '/../models/UserModel.php'; // Se agregó
+require_once __DIR__ . '/../models/RoleModel.php'; // Se agregó
 
 class PortfolioController
 {
     private $portfolioModel;
+    private $userModel;
+    private $roleModel;
 
     public function __construct()
     {
         $this->portfolioModel = new PortfolioModel();
+        $this->userModel = new UserModel();
+        $this->roleModel = new RoleModel();
     }
 
     public function index()
     {
-        // Lógica para listar portafolios (puedes filtrar por usuario o PAO)
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_PATH . '/');
+            exit();
+        }
+        $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
+
         $portfolios = $this->portfolioModel->getAll();
         $pageTitle = 'Gestión de Portafolios';
         require_once __DIR__ . '/../views/portfolios/index.php';
@@ -22,16 +33,14 @@ class PortfolioController
 
     public function upload()
     {
-        // Lógica para procesar la subida del archivo
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_PATH . '/');
+            exit();
+        }
+        $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Lógica para manejar el archivo subido
-            $documentPath = 'uploads/' . basename($_FILES["document"]["name"]);
-            // Mover el archivo subido al directorio
-            // move_uploaded_file($_FILES["document"]["tmp_name"], $documentPath);
-            
-            // Guardar la información en la base de datos a través del modelo
-            // $this->portfolioModel->create($professor_id, $pao_id, $documentPath);
-            
+            // Lógica para procesar la subida del archivo...
             header('Location: ' . BASE_PATH . '/portfolios');
             exit();
         }

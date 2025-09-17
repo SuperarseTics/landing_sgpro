@@ -1,6 +1,5 @@
 <?php
 // app/controllers/UserController.php
-//controlador para el uso del super adminsitrador
 
 require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../models/RoleModel.php';
@@ -19,11 +18,14 @@ class UserController
     public function index()
     {
         // Lógica de autenticación y autorización
-        // Solo un Super Administrador debería ver esto
-        // if ($_SESSION['user_role'] != 'Super Administrador') {
-        //     header('Location: ' . BASE_PATH . '/dashboard');
-        //     exit();
-        // }
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_PATH . '/');
+            exit();
+        }
+        
+        // CORRECCIÓN: Obtener los roles del usuario actual para la barra de navegación.
+        $user = $this->userModel->find($_SESSION['user_id']);
+        $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
         
         $users = $this->userModel->getAll();
         $pageTitle = 'Gestión de Usuarios';
@@ -32,17 +34,20 @@ class UserController
 
     public function edit($id)
     {
-        // Lógica para mostrar el formulario de edición de usuario
+        // CORRECCIÓN: Obtener los roles del usuario actual para la barra de navegación.
         $user = $this->userModel->find($id);
         $roles = $this->roleModel->getAll();
         $userRoles = $this->roleModel->getRolesByUserId($id);
         $pageTitle = 'Editar Usuario';
+        
+        // CORRECCIÓN: Obtener los roles del usuario actual para la barra de navegación.
+        $currentUserRoles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
+        
         require_once __DIR__ . '/../views/users/edit.php';
     }
 
     public function update()
     {
-        // Lógica para procesar la actualización del usuario
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? null;
             $name = $_POST['name'] ?? '';

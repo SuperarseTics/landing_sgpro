@@ -17,7 +17,8 @@
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/dashboard" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a>
                 </li>
-                <?php if (in_array(['role_name' => 'Profesor'], $roles)): ?>
+                
+                <?php if (in_array(['role_name' => 'Profesor'], $roles) || in_array(['role_name' => 'Super Administrador'], $roles)): ?>
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/professor/profile" class="block py-2 px-4 rounded hover:bg-gray-700">Mi Perfil</a>
                 </li>
@@ -25,14 +26,34 @@
                     <a href="<?php echo BASE_PATH; ?>/portfolios" class="block py-2 px-4 rounded hover:bg-gray-700">Portafolios</a>
                 </li>
                 <?php endif; ?>
-                <?php if (in_array(['role_name' => 'Coordinador académico'], $roles)): ?>
+
+                <?php if (in_array(['role_name' => 'Coordinador académico'], $roles) || in_array(['role_name' => 'Super Administrador'], $roles)): ?>
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/evaluations" class="block py-2 px-4 rounded hover:bg-gray-700">Evaluaciones</a>
+                </li>
+                <li class="mb-2">
+                    <a href="<?php echo BASE_PATH; ?>/continuity" class="block py-2 px-4 rounded hover:bg-gray-700">Continuidad</a>
                 </li>
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/academic/assignments" class="block py-2 px-4 rounded hover:bg-gray-700">Asignaciones</a>
                 </li>
                 <?php endif; ?>
+                
+                <?php if (in_array(['role_name' => 'Talento Humano'], $roles) || in_array(['role_name' => 'Super Administrador'], $roles)): ?>
+                <li class="mb-2">
+                    <a href="<?php echo BASE_PATH; ?>/contracts" class="block py-2 px-4 rounded hover:bg-gray-700">Contratos</a>
+                </li>
+                <li class="mb-2">
+                    <a href="<?php echo BASE_PATH; ?>/invoices" class="block py-2 px-4 rounded hover:bg-gray-700">Facturas</a>
+                </li>
+                <?php endif; ?>
+
+                <?php if (in_array(['role_name' => 'Director de Docencia'], $roles) || in_array(['role_name' => 'Super Administrador'], $roles)): ?>
+                <li class="mb-2">
+                    <a href="<?php echo BASE_PATH; ?>/academic/subjects" class="block py-2 px-4 rounded hover:bg-gray-700">Materias</a>
+                </li>
+                <?php endif; ?>
+
                  <?php if (in_array(['role_name' => 'Super Administrador'], $roles)): ?>
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/users" class="block py-2 px-4 rounded hover:bg-gray-700">Gestión de Usuarios</a>
@@ -41,6 +62,7 @@
                     <a href="<?php echo BASE_PATH; ?>/pao" class="block py-2 px-4 rounded hover:bg-gray-700">Gestión de PAO</a>
                 </li>
                 <?php endif; ?>
+                
                  <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/logout" class="block py-2 px-4 rounded text-red-400 hover:bg-gray-700">Cerrar Sesión</a>
                 </li>
