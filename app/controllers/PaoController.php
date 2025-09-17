@@ -2,63 +2,67 @@
 // app/controllers/PaoController.php
 
 require_once __DIR__ . '/../models/PaoModel.php';
-require_once __DIR__ . '/../models/UserModel.php'; // Agrega este
-require_once __DIR__ . '/../models/RoleModel.php'; // Agrega este
+require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../models/RoleModel.php';
+require_once __DIR__ . '/../models/AuditLogModel.php'; // Agregamos el modelo de auditoría
 
-class PaoController
-{
+class PaoController {
     private $paoModel;
     private $userModel;
     private $roleModel;
+    private $auditLogModel; // Propiedad para el modelo de auditoría
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->paoModel = new PaoModel();
         $this->userModel = new UserModel();
         $this->roleModel = new RoleModel();
+        $this->auditLogModel = new AuditLogModel(); // Instanciamos el modelo de auditoría
     }
 
-    public function index()
-    {
-        // Verifica si el usuario está autenticado
+    public function index() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: ' . BASE_PATH . '/');
             exit();
         }
 
-        // Obtener los roles del usuario actual para la barra de navegación.
-        $user = $this->userModel->find($_SESSION['user_id']);
         $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
-
         $paos = $this->paoModel->getAll();
         $pageTitle = 'Gestión de PAO';
         require_once __DIR__ . '/../views/pao/index.php';
     }
 
-    public function create()
-    {
-        // Obtener los roles del usuario actual para la barra de navegación.
-        $user = $this->userModel->find($_SESSION['user_id']);
+    public function create() {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_PATH . '/');
+            exit();
+        }
+
         $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
-        
         $pageTitle = 'Crear PAO';
         require_once __DIR__ . '/../views/pao/create.php';
     }
 
-    public function store()
-    {
+    public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Lógica para guardar un nuevo PAO
-            $name = $_POST['name'];
-            $start_date = $_POST['start_date'];
-            $end_date = $_POST['end_date'];
+            $name = $_POST['name'] ?? '';
+            $start_date = $_POST['start_date'] ?? '';
+            $end_date = $_POST['end_date'] ?? '';
 
-            // Usar el modelo para insertar en la base de datos
-            // $this->paoModel->create($name, $start_date, $end_date);
-            
-            // Redirigir después de guardar
-            header('Location: ' . BASE_PATH . '/pao');
-            exit();
+            if ($this->paoModel->create($name, $start_date, $end_date)) {
+                
+                // Obtener el ID del último PAO creado
+                $lastPaoId = $this->paoModel->getLastInsertedId();
+                
+                // Lógica de Auditoría: Registrar la acción
+                $userId = $_SESSION['user_id'] ?? null;
+                $newData = ['name' => $name, 'start_date' => $start_date, 'end_date' => $end_date];
+                $this->auditLogModel->logAction($userId, 'CREATE', 'pao', $lastPaoId, null, $newData);
+
+                header('Location: ' . BASE_PATH . '/pao');
+                exit();
+            } else {
+                echo "Error al guardar el PAO.";
+            }
         }
     }
 }
