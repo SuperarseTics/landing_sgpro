@@ -1,31 +1,34 @@
 <?php
 // app/controllers/AuthController.php
 
-// Asegúrate de requerir la clase del modelo que necesites
-require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../models/RoleModel.php';
 
 class AuthController
 {
+    private $userModel;
+    private $roleModel;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+        $this->roleModel = new RoleModel();
+    }
 
     public function showLogin()
     {
-        // Lógica para mostrar la vista del formulario de login
         $pageTitle = 'Login - SGPRO';
         require_once __DIR__ . '/../views/auth/login.php';
     }
 
     public function login()
     {
-        // Verifica si la petición es un POST y captura los datos del formulario
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
-            // Lógica de validación y autenticación (con PDO)
-            $db = Database::getInstance()->getConnection();
-            $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch();
+            // Usa el modelo para buscar el usuario por email
+            $user = $this->userModel->findByEmail($email);
 
             if ($user && password_verify($password, $user['password'])) {
                 // Autenticación exitosa
@@ -44,22 +47,11 @@ class AuthController
         }
     }
 
-    public function logout()
-    {
-        session_destroy();
-        // Redirige al login
-        header('Location: ' . BASE_PATH . '/');
-        exit();
-    }
-
     public function showRegister()
     {
         $pageTitle = 'Registro - SGPRO';
-        // Aquí pasas los roles disponibles a la vista
-        $db = Database::getInstance()->getConnection();
-        $stmt = $db->prepare("SELECT id, role_name FROM user_roles");
-        $stmt->execute();
-        $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Usa el modelo para obtener todos los roles
+        $roles = $this->roleModel->getAll();
 
         require_once __DIR__ . '/../views/auth/register.php';
     }
@@ -72,7 +64,6 @@ class AuthController
             $password = $_POST['password'] ?? '';
             $role_id = $_POST['role'] ?? null;
 
-            // Validaciones básicas
             if (empty($name) || empty($email) || empty($password) || empty($role_id)) {
                 $error = "Todos los campos son obligatorios.";
                 $this->showRegister();
@@ -83,26 +74,29 @@ class AuthController
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
             try {
-                // Guarda el usuario en la base de datos
-                $db = Database::getInstance()->getConnection();
-                $stmt = $db->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-                $stmt->execute([$name, $email, $hashedPassword]);
+                // Usa el modelo de usuario para crear el nuevo registro
+                $this->userModel->create($name, $email, $hashedPassword);
+                $user_id = $this->userModel->getConnection()->lastInsertId();
 
-                $user_id = $db->lastInsertId();
+                // Usa el modelo de rol para asignar el rol
+                $this->roleModel->assignRoleToUser($user_id, $role_id);
 
-                // Asigna el rol al usuario en la tabla de unión
-                $stmt = $db->prepare("INSERT INTO user_roles_pivot (user_id, role_id) VALUES (?, ?)");
-                $stmt->execute([$user_id, $role_id]);
-
-                // Registro exitoso, redirige al login
+                // Redirige al login después de un registro exitoso
                 header('Location: ' . BASE_PATH . '/');
                 exit();
 
             } catch (PDOException $e) {
-                // Maneja errores (ej. email ya existe)
-                $error = "Error al registrar el usuario: " . $e->getMessage();
+                // Manejo de error si el email ya existe
+                $error = "Error al registrar el usuario. El correo electrónico podría ya existir.";
                 $this->showRegister();
             }
         }
+    }
+
+    public function logout()
+    {
+        session_destroy();
+        header('Location: ' . BASE_PATH . '/');
+        exit();
     }
 }
