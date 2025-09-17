@@ -14,6 +14,8 @@ class Router {
         $this->addRoute('/pao/store', 'Pao@store');
         $this->addRoute('/professor/profile', 'Professor@showProfile');
         $this->addRoute('/professor/update', 'Professor@updateProfile');
+        $this->addRoute('/register', 'Auth@showRegister');
+        $this->addRoute('/register/store', 'Auth@register');
     }
 
     public function addRoute($url, $controllerMethod) {

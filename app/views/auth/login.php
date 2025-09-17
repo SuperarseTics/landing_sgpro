@@ -33,6 +33,12 @@
                 Iniciar Sesión
             </button>
         </form>
+        <p class="mt-4 text-center text-sm text-gray-600">
+            ¿No tienes una cuenta?
+            <a href="<?php echo BASE_PATH; ?>/register" class="font-medium text-blue-600 hover:text-blue-500">
+                Regístrate aquí
+            </a>
+        </p>
     </div>
 </body>
 
