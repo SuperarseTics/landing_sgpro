@@ -1,5 +1,6 @@
 <?php
 // app/controllers/UserController.php
+//controlador para el uso del super adminsitrador
 
 require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../models/RoleModel.php';
