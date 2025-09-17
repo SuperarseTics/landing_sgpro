@@ -3,18 +3,21 @@
 
 require_once __DIR__ . '/BaseModel.php';
 
-class PaoModel extends BaseModel {
+class PaoModel extends BaseModel
+{
     protected $table = "pao";
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
-    
+
     // El método getAll() ya está definido en BaseModel
 
-    public function create($name, $start_date, $end_date) {
+    public function create($name, $start_date, $end_date)
+    {
         $query = "INSERT INTO " . $this->table . " (name, start_date, end_date) VALUES (?, ?, ?)";
-        
+
         $stmt = $this->db->prepare($query);
 
         // Limpieza y asignación de datos
@@ -27,5 +30,10 @@ class PaoModel extends BaseModel {
         }
 
         return false;
+    }
+
+    public function getLastInsertedId()
+    {
+        return $this->db->lastInsertId();
     }
 }

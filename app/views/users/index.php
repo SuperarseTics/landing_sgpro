@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 font-sans">
-    
+
     <?php require_once __DIR__ . '/../dashboard/index.php'; ?>
 
     <div class="ml-64 p-8">
-        <header class="mb-6">
+        <header class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
+            <a href="<?php echo BASE_PATH; ?>/users/create" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300">
+                Crear Usuario
+            </a>
         </header>
 
         <main class="bg-white p-6 rounded-lg shadow-md">
@@ -48,11 +53,14 @@
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="4" class="text-center py-4 text-gray-500">No hay usuarios registrados.</td></tr>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-gray-500">No hay usuarios registrados.</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </main>
     </div>
 </body>
+
 </html>
