@@ -62,4 +62,19 @@ class UserModel extends BaseModel
 
         return $stmt->execute();
     }
+
+    public function getUsersByRole($roleName)
+    {
+        // Corregida la consulta para unirse a la tabla de roles y usar la columna 'role_name'
+        $query = "SELECT u.id, u.name 
+              FROM users u 
+              JOIN user_roles_pivot urp ON u.id = urp.user_id 
+              JOIN user_roles r ON urp.role_id = r.id 
+              WHERE r.role_name = ?";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $roleName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
