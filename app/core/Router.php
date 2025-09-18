@@ -49,7 +49,10 @@ class Router
 
         // Rutas de gestión de Contratos
         $this->addRoute('/contracts', 'Contract@index');
-        $this->addRoute('/contracts/upload', 'Contract@upload');
+        $this->addRoute('/contracts/create', 'Contract@create');
+        $this->addRoute('/contracts/store', 'Contract@store');
+        $this->addRoute('/contracts/edit/{id}', 'Contract@edit');
+        $this->addRoute('/contracts/update/{id}', 'Contract@update');
 
         // Rutas de gestión de Facturas (Corregidas)
         $this->addRoute('/invoices', 'Invoice@index');
