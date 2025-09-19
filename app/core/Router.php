@@ -42,10 +42,15 @@ class Router
         $this->addRoute('/evaluations', 'Evaluation@index');
         $this->addRoute('/evaluations/create', 'Evaluation@create');
         $this->addRoute('/evaluations/store', 'Evaluation@store');
+        $this->addRoute('/evaluations/edit/{id}', 'Evaluation@edit'); 
+        $this->addRoute('/evaluations/update/{id}', 'Evaluation@update');
 
         // Rutas de gestión de Continuidad
         $this->addRoute('/continuity', 'Continuity@index');
-        $this->addRoute('/continuity/decide', 'Continuity@decide');
+        $this->addRoute('/continuity/create', 'Continuity@create');
+        $this->addRoute('/continuity/store', 'Continuity@store');
+        $this->addRoute('/continuity/edit/{id}', 'Continuity@edit');
+        $this->addRoute('/continuity/update/{id}', 'Continuity@update');
 
         // Rutas de gestión de Contratos
         $this->addRoute('/contracts', 'Contract@index');
@@ -54,7 +59,7 @@ class Router
         $this->addRoute('/contracts/edit/{id}', 'Contract@edit');
         $this->addRoute('/contracts/update/{id}', 'Contract@update');
 
-        // Rutas de gestión de Facturas (Corregidas)
+        // Rutas de gestión de Facturas
         $this->addRoute('/invoices', 'Invoice@index');
         $this->addRoute('/invoices/create', 'Invoice@create');
         $this->addRoute('/invoices/store', 'Invoice@store');
