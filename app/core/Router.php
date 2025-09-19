@@ -61,10 +61,12 @@ class Router
         $this->addRoute('/invoices/edit/{id}', 'Invoice@edit');
         $this->addRoute('/invoices/update/{id}', 'Invoice@update');
 
-        // Rutas de gestión académica (Carreras, Asignaturas, Asignaciones)
-        //$this->addRoute('/academic/careers', 'Academic@careers');
-        //$this->addRoute('/academic/subjects', 'Academic@subjects');
-        //$this->addRoute('/academic/assignments', 'Academic@assignments');
+        // Rutas de gestión de Asignaciones
+        $this->addRoute('/academic/assignments', 'Assignment@index');
+        $this->addRoute('/academic/assignments/create', 'Assignment@create');
+        $this->addRoute('/academic/assignments/store', 'Assignment@store');
+        $this->addRoute('/academic/assignments/edit/{id}', 'Assignment@edit');
+        $this->addRoute('/academic/assignments/update/{id}', 'Assignment@update');
 
         // Rutas de gestión de Carreras
         $this->addRoute('/academic/careers', 'Career@index');
