@@ -36,13 +36,16 @@ class Router
 
         // Rutas de gestión de Portafolios
         $this->addRoute('/portfolios', 'Portfolio@index');
-        $this->addRoute('/portfolios/upload', 'Portfolio@upload');
+        $this->addRoute('/portfolios/create', 'Portfolio@create');
+        $this->addRoute('/portfolios/store', 'Portfolio@store');
+        $this->addRoute('/portfolios/edit/{id}', 'Portfolio@edit');
+        $this->addRoute('/portfolios/update/{id}', 'Portfolio@update');
 
         // Rutas de gestión de Evaluaciones
         $this->addRoute('/evaluations', 'Evaluation@index');
         $this->addRoute('/evaluations/create', 'Evaluation@create');
         $this->addRoute('/evaluations/store', 'Evaluation@store');
-        $this->addRoute('/evaluations/edit/{id}', 'Evaluation@edit'); 
+        $this->addRoute('/evaluations/edit/{id}', 'Evaluation@edit');
         $this->addRoute('/evaluations/update/{id}', 'Evaluation@update');
 
         // Rutas de gestión de Continuidad
