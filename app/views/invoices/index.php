@@ -73,6 +73,15 @@
                                     $<?php echo htmlspecialchars($invoice['amount']); ?>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <?php if (!empty($invoice['payment_proof_path'])): ?>
+                                        <a href="<?php echo BASE_PATH . '/' . htmlspecialchars($invoice['payment_proof_path']); ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                            Ver Archivo
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-gray-500">N/A</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <?php
                                     $statusClass = '';
                                     switch ($invoice['status']) {
@@ -94,15 +103,6 @@
                                         <?php echo htmlspecialchars($invoice['status']); ?>
                                     </span>
 
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <?php if (!empty($invoice['payment_proof_path'])): ?>
-                                        <a href="<?php echo BASE_PATH . '/' . htmlspecialchars($invoice['payment_proof_path']); ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
-                                            Ver Archivo
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="text-gray-500">N/A</span>
-                                    <?php endif; ?>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <a href="<?php echo BASE_PATH; ?>/invoices/edit/<?php echo $invoice['id']; ?>" class="text-blue-600 hover:text-blue-900">Editar</a>

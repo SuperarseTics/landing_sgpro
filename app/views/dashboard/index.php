@@ -20,7 +20,7 @@
                 
                 <?php if (in_array(['role_name' => 'Profesor'], $roles) || in_array(['role_name' => 'Super Administrador'], $roles)): ?>
                 <li class="mb-2">
-                    <a href="<?php echo BASE_PATH; ?>/professor/profile" class="block py-2 px-4 rounded hover:bg-gray-700">Mi Perfil</a>
+                    <a href="<?php echo BASE_PATH; ?>/professor/cv" class="block py-2 px-4 rounded hover:bg-gray-700">Mi Perfil</a>
                 </li>
                 <li class="mb-2">
                     <a href="<?php echo BASE_PATH; ?>/portfolios" class="block py-2 px-4 rounded hover:bg-gray-700">Portafolios</a>

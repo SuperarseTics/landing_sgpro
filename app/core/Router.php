@@ -22,9 +22,101 @@ class Router
         $this->addRoute('/pao/create', 'Pao@create');
         $this->addRoute('/pao/store', 'Pao@store');
 
-        // Rutas de gestión de Perfil de Profesor
-        $this->addRoute('/professor/profile', 'Professor@showProfile');
-        $this->addRoute('/professor/save-cv', 'Professor@saveCv');
+        // Rutas de gestión de la Hoja de Vida del Profesor
+        $this->addRoute('/professor/cv', 'ProfessorCv@index');
+        $this->addRoute('/professor/cv/edit', 'ProfessorCv@edit');
+        $this->addRoute('/professor/cv/update/{table}/{id}', 'ProfessorCv@update');
+        $this->addRoute('/professor/cv/update/{table}', 'ProfessorCv@update');
+        $this->addRoute('/professor/cv/create', 'ProfessorCv@create');
+        $this->addRoute('/professor/cv/store', 'ProfessorCv@store');
+
+        // Rutas de gestión de Educación y Formación
+        $this->addRoute('/professor/education', 'CvEducation@index');
+        $this->addRoute('/professor/education/store', 'CvEducation@store');
+        $this->addRoute('/professor/education/delete/{id}', 'CvEducation@delete');
+        $this->addRoute('/professor/education/edit/{id}', 'CvEducation@edit');
+        $this->addRoute('/professor/education/update/{id}', 'CvEducation@update');
+        $this->addRoute('/professor/education/create', 'CvEducation@create');
+
+        // Rutas de gestión de Experiencia en Gestión Académica
+        $this->addRoute('/professor/academic-management', 'CvAcademicManagementExperience@index');
+        $this->addRoute('/professor/academic-management/store', 'CvAcademicManagementExperience@store');
+        $this->addRoute('/professor/academic-management/delete/{id}', 'CvAcademicManagementExperience@delete');
+        $this->addRoute('/professor/academic-management/edit/{id}', 'CvAcademicManagementExperience@edit');
+        $this->addRoute('/professor/academic-management/update/{id}', 'CvAcademicManagementExperience@update');
+        $this->addRoute('/professor/academic-management/create', 'CvAcademicManagementExperience@create');
+
+        // Rutas de gestión de Experiencia Docente
+        $this->addRoute('/professor/teaching-experience', 'CvTeachingExperience@index');
+        $this->addRoute('/professor/teaching-experience/store', 'CvTeachingExperience@store');
+        $this->addRoute('/professor/teaching-experience/delete/{id}', 'CvTeachingExperience@delete');
+        $this->addRoute('/professor/teaching-experience/edit/{id}', 'CvTeachingExperience@edit');
+        $this->addRoute('/professor/teaching-experience/update/{id}', 'CvTeachingExperience@update');
+        $this->addRoute('/professor/teaching-experience/create', 'CvTeachingExperience@create');
+
+        // Rutas de gestión de Experiencia Profesional
+        $this->addRoute('/professor/professional-experience', 'CvProfessionalExperience @index');
+        $this->addRoute('/professor/professional-experience/store', 'CvProfessionalExperience@store');
+        $this->addRoute('/professor/professional-experience/delete/{id}', 'CvProfessionalExperience@delete');
+        $this->addRoute('/professor/professional-experience/edit/{id}', 'CvProfessionalExperience@edit');
+        $this->addRoute('/professor/professional-experience/update/{id}', 'CvProfessionalExperience@update');
+        $this->addRoute('/professor/professional-experience/create', 'CvProfessionalExperience@create');
+        
+        // Rutas de gestión de Proyectos de Investigación
+        $this->addRoute('/professor/research-projects', 'CvResearchProjects@index');
+        $this->addRoute('/professor/research-projects/store', 'CvResearchProjects@store');
+        $this->addRoute('/professor/research-projects/delete/{id}', 'CvResearchProjects@delete');
+        $this->addRoute('/professor/research-projects/edit/{id}', 'CvResearchProjects@edit');
+        $this->addRoute('/professor/research-projects/update/{id}', 'CvResearchProjects@update');
+        $this->addRoute('/professor/research-projects/create', 'CvResearchProjects@create');
+
+        // Rutas de gestión de Ponencias
+        $this->addRoute('/professor/presentations', 'CvPresentations@index');
+        $this->addRoute('/professor/presentations/store', 'CvPresentations@store');
+        $this->addRoute('/professor/presentations/delete/{id}', 'CvPresentations@delete');
+        $this->addRoute('/professor/presentations/edit/{id}', 'CvPresentations@edit');
+        $this->addRoute('/professor/presentations/update/{id}', 'CvPresentations@update');
+        $this->addRoute('/professor/presentations/create', 'CvPresentations@create');
+
+        // Rutas de gestión de Publicaciones
+        $this->addRoute('/professor/publications', 'CvPublications@index');
+        $this->addRoute('/professor/publications/store', 'CvPublications@store');
+        $this->addRoute('/professor/publications/delete/{id}', 'CvPublications@delete');
+        $this->addRoute('/professor/publications/edit/{id}', 'CvPublications@edit');
+        $this->addRoute('/professor/publications/update/{id}', 'CvPublications@update');
+        $this->addRoute('/professor/publications/create', 'CvPublications@create');
+
+        // Rutas de gestión de Proyectos de Vinculación
+        $this->addRoute('/professor/outreach-projects', 'CvOutreachProjects@index');
+        $this->addRoute('/professor/outreach-projects/store', 'CvOutreachProjects@store');
+        $this->addRoute('/professor/outreach-projects/delete/{id}', 'CvOutreachProjects@delete');
+        $this->addRoute('/professor/outreach-projects/edit/{id}', 'CvOutreachProjects@edit');
+        $this->addRoute('/professor/outreach-projects/update/{id}', 'CvOutreachProjects@update');
+        $this->addRoute('/professor/outreach-projects/create', 'CvOutreachProjects@create');
+
+        // Rutas de gestión de Dirección de Tesis
+        $this->addRoute('/professor/thesis-direction', 'CvThesisDirection@index');
+        $this->addRoute('/professor/thesis-direction/store', 'CvThesisDirection@store');
+        $this->addRoute('/professor/thesis-direction/delete/{id}', 'CvThesisDirection@delete');
+        $this->addRoute('/professor/thesis-direction/edit/{id}', 'CvThesisDirection@edit');
+        $this->addRoute('/professor/thesis-direction/update/{id}', 'CvThesisDirection@update');
+        $this->addRoute('/professor/thesis-direction/create', 'CvThesisDirection@create');
+
+        // Rutas de gestión de Referencias Laborales
+        $this->addRoute('/professor/work-references', 'CvWorkReferences@index');
+        $this->addRoute('/professor/work-references/store', 'CvWorkReferences@store');
+        $this->addRoute('/professor/work-references/delete/{id}', 'CvWorkReferences@delete');
+        $this->addRoute('/professor/work-references/edit/{id}', 'CvWorkReferences@edit');
+        $this->addRoute('/professor/work-references/update/{id}', 'CvWorkReferences@update');
+        $this->addRoute('/professor/work-references/create', 'CvWorkReferences@create');
+
+        // Rutas de gestión de Referencias Personales
+        $this->addRoute('/professor/personal-references', 'CvPersonalReferences@index');
+        $this->addRoute('/professor/personal-references/store', 'CvPersonalReferences@store');
+        $this->addRoute('/professor/personal-references/delete/{id}', 'CvPersonalReferences@delete');
+        $this->addRoute('/professor/personal-references/edit/{id}', 'CvPersonalReferences@edit');
+        $this->addRoute('/professor/personal-references/update/{id}', 'CvPersonalReferences@update');
+        $this->addRoute('/professor/personal-references/create', 'CvPersonalReferences@create');
 
         // Rutas de gestión de usuarios (Super Administrador)
         $this->addRoute('/users', 'User@index');

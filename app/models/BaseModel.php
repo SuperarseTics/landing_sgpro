@@ -39,4 +39,18 @@ abstract class BaseModel
     {
         return $this->db->lastInsertId();
     }
+
+    /**
+     * Obtiene todos los registros de la tabla para un profesor específico.
+     *
+     * @param int $professorId
+     * @return array
+     */
+    public function getAllByProfessorId($professorId)
+    {
+        $query = "SELECT * FROM {$this->table} WHERE professor_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$professorId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
