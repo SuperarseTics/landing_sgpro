@@ -54,13 +54,13 @@ class ContinuityController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $professorId = $_POST['professor_id'] ?? null;
             $paoId = $_POST['pao_id'] ?? null;
-            
+
             if ($this->continuityModel->create($professorId, $paoId)) {
                 $lastId = $this->continuityModel->getLastInsertedId();
                 $userIdLog = $_SESSION['user_id'] ?? null;
                 $newData = ['professor_id' => $professorId, 'pao_id' => $paoId, 'final_status' => 'Pendiente'];
                 $this->auditLogModel->logAction($userIdLog, 'CREATE', 'continuity', $lastId, null, $newData);
-                
+
                 header('Location: ' . BASE_PATH . '/continuity');
                 exit();
             } else {
@@ -75,53 +75,118 @@ class ContinuityController
             header('Location: ' . BASE_PATH . '/');
             exit();
         }
-        $roles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
+
+        $userIdLog = $_SESSION['user_id'];
+        $roles = $this->roleModel->getRolesByUserId($userIdLog);
         $continuity = $this->continuityModel->find($id);
 
         if (!$continuity) {
             header('Location: ' . BASE_PATH . '/continuity');
             exit();
         }
-        
+
         $professor = $this->userModel->find($continuity['professor_id']);
         $pao = $this->paoModel->find($continuity['pao_id']);
         $approvedBy = $this->userModel->find($continuity['docencia_decision_by']);
 
+        // --- LÓGICA DE ROLES Y PERMISOS MOVIDA AQUÍ (al Controller) ---
+        $userRoleNames = array_column($roles, 'role_name');
+
+        $isSuperAdmin = in_array('Super Administrador', $userRoleNames);
+        $isDocenciaTHRole = in_array('Director de docencia', $userRoleNames) || in_array('Talento humano', $userRoleNames);
+
+        // Permiso para ver/editar la Decisión del Profesor (Sección 1)
+        $canViewEditProfessorDecision = $isSuperAdmin || (in_array('Profesor', $userRoleNames) && $continuity['professor_id'] == $userIdLog);
+
+        // Permiso para ver/editar la Decisión de Docencia/TH (Sección 2)
+        $canViewEditDocenciaTHDecision = $isSuperAdmin || $isDocenciaTHRole;
+        // --- FIN LÓGICA DE ROLES ---
+
         $pageTitle = 'Editar Continuidad: ' . htmlspecialchars($continuity['id']);
+
+        // Pasamos las nuevas variables de control a la vista
         require_once __DIR__ . '/../views/continuity/edit-continuity.php';
     }
 
+    // =========================================================================
+    // MÉTODO DE ACTUALIZACIÓN (CON RESTRICCIÓN DE WORKFLOW)
+    // =========================================================================
     public function update($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $oldContinuity = $this->continuityModel->find($id);
             if (!$oldContinuity) {
-                echo "Continuidad no encontrada.";
+                // Redirige si la continuidad no se encuentra, en lugar de imprimir un error
+                header('Location: ' . BASE_PATH . '/continuity');
                 exit();
             }
 
             $userIdLog = $_SESSION['user_id'] ?? null;
-            $userRoles = $this->roleModel->getRolesByUserId($userIdLog);
 
-            // Actualización de la decisión del profesor
-            if (in_array('Profesor', $userRoles) && isset($_POST['professor_decision'])) {
-                $decision = $_POST['professor_decision'] == '1';
-                $this->continuityModel->updateProfessorDecision($id, $decision);
-                $newData = ['professor_decision' => $decision];
-                $oldData = ['professor_decision' => $oldContinuity['professor_decision']];
-                $this->auditLogModel->logAction($userIdLog, 'UPDATE', 'continuity', $id, $oldData, $newData);
-            }
-            
-            // Actualización de la decisión de Docencia
-            if (in_array('Dirección de Docencia', $userRoles) && isset($_POST['docencia_decision'])) {
-                $decision = $_POST['docencia_decision'] == '1';
-                $this->continuityModel->updateDocenciaDecision($id, $decision, $userIdLog);
-                $newData = ['docencia_decision' => $decision];
-                $oldData = ['docencia_decision' => $oldContinuity['docencia_decision']];
-                $this->auditLogModel->logAction($userIdLog, 'UPDATE', 'continuity', $id, $oldData, $newData);
+            // Determinar qué campo se está intentando actualizar (viene del campo oculto 'update_field' de la vista)
+            $fieldToUpdate = $_POST['update_field'] ?? null;
+            $updated = false;
+            $oldData = [];
+            $newData = [];
+            $decision = null;
+            $success = false;
+            $logAction = null;
+            $approvedBy = null;
+
+            // --- Decisión del Profesor (Primer paso) ---
+            if ($fieldToUpdate === 'professor_decision' && isset($_POST['professor_decision'])) {
+
+                $decision = (int)($_POST['professor_decision'] == '1'); // 1 o 0
+                $approvedBy = $userIdLog;
+
+                // Usamos el método dinámico para actualizar la decisión del profesor
+                $success = $this->continuityModel->updateDecisionDynamically(
+                    $id,
+                    $fieldToUpdate,
+                    $decision,
+                    $approvedBy
+                );
+
+                if ($success) {
+                    $oldData = ['professor_decision' => $oldContinuity['professor_decision']];
+                    $newData = ['professor_decision' => $decision];
+                    $logAction = 'Decisión de Profesor';
+                    $updated = true;
+                }
+
+                // --- Decisión de Docencia/TH (Segundo paso: Solo si el Profesor ya decidió) ---
+            } elseif ($fieldToUpdate === 'docencia_decision' && isset($_POST['docencia_decision'])) {
+
+                // Aplicamos la restricción de workflow: solo se puede decidir si el profesor ya dio su decisión.
+                if ($oldContinuity['professor_decision'] !== null) {
+
+                    $decision = (int)($_POST['docencia_decision'] == '1'); // 1 o 0
+                    $approvedBy = $userIdLog;
+
+                    // Usamos el método dinámico para actualizar la decisión de docencia
+                    $success = $this->continuityModel->updateDecisionDynamically(
+                        $id,
+                        $fieldToUpdate,
+                        $decision,
+                        $approvedBy
+                    );
+
+                    if ($success) {
+                        $oldData = ['docencia_decision' => $oldContinuity['docencia_decision']];
+                        $newData = ['docencia_decision' => $decision];
+                        $logAction = 'Decisión de Docencia';
+                        $updated = true;
+                    }
+                }
             }
 
-            header('Location: ' . BASE_PATH . '/continuity');
+            // Si se actualizó algo, registra el log de auditoría
+            if ($updated) {
+                $this->auditLogModel->logAction($userIdLog, 'UPDATE', 'continuity: ' . $logAction, $id, $oldData, $newData);
+            }
+
+            // Redirigir de vuelta a la edición para ver el cambio
+            header('Location: ' . BASE_PATH . '/continuity/edit/' . $id);
             exit();
         }
     }

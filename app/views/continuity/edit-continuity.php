@@ -1,105 +1,141 @@
+<?php
+$isProfessorDecisionMade = $continuity['professor_decision'] !== null;
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($pageTitle); ?></title>
+    <title><?= htmlspecialchars($pageTitle) ?></title>
+    <!-- Incluir Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo para simular deshabilitación visual y bloqueo de interacción */
+        .workflow-disabled {
+            filter: grayscale(100%);
+            pointer-events: none;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+
+<body class="bg-gray-50 min-h-screen p-4 sm:p-8">
+
     <?php require_once __DIR__ . '/../dashboard/index.php'; ?>
 
-    <div class="ml-64 p-8">
-        <header class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">
-                Decisión de Continuidad para <?php echo htmlspecialchars($professor['name']); ?>
-            </h1>
-            <p class="text-gray-600">PAO: <?php echo htmlspecialchars($pao['name']); ?></p>
-        </header>
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+        <h1 class="text-3xl font-extrabold text-indigo-800 mb-6 border-b pb-2"><?= htmlspecialchars($pageTitle) ?></h1>
 
-        <main class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
-            <h2 class="text-xl font-semibold mb-4">Estado Actual:
-                <?php 
-                    $statusClass = '';
-                    switch ($continuity['final_status']) {
-                        case 'Pendiente':
-                            $statusClass = 'bg-yellow-200 text-yellow-900';
-                            break;
-                        case 'Ractificado':
-                            $statusClass = 'bg-green-200 text-green-900';
-                            break;
-                        case 'No Ractificado':
-                            $statusClass = 'bg-red-200 text-red-900';
-                            break;
-                    }
-                ?>
-                <span class="relative inline-block px-3 py-1 font-semibold leading-tight <?php echo $statusClass; ?> rounded-full">
-                    <?php echo htmlspecialchars($continuity['final_status']); ?>
-                </span>
-            </h2>
+        <!-- Detalles de la Continuidad -->
+        <div class="bg-indigo-50 p-4 rounded-lg shadow-inner mb-8">
+            <p class="text-lg"><strong>Profesor:</strong> <?= htmlspecialchars($professor['name'] ?? 'N/A') ?></p>
+            <p><strong>PAO:</strong> <?= htmlspecialchars($pao['name'] ?? 'N/A') ?></p>
+            <p class="text-md font-semibold mt-2">Estado Final: <span class="text-green-700"><?= htmlspecialchars($continuity['final_status']) ?></span></p>
+        </div>
 
-            <?php
-            // Lógica para mostrar formularios basados en el rol y el estado actual
-            $userRoles = $this->roleModel->getRolesByUserId($_SESSION['user_id']);
-            $isProfessor = in_array('Profesor', $userRoles) && $continuity['professor_id'] == $_SESSION['user_id'];
-            $isDocencia = in_array('Dirección de Docencia', $userRoles);
-            ?>
+        <!-- 1. Decisión del Profesor (Primer Paso) -->
+        <?php if ($canViewEditProfessorDecision): ?>
+            <div class="mb-10 p-6 border border-indigo-200 rounded-xl shadow-lg bg-white">
+                <h2 class="text-2xl font-bold text-indigo-700 mb-4">1. Decisión del Profesor</h2>
 
-            <?php if ($isProfessor && $continuity['professor_decision'] === null): ?>
-                <h3 class="text-lg font-bold mb-2 mt-6">Tu Decisión:</h3>
-                <form action="<?php echo BASE_PATH; ?>/continuity/update/<?php echo htmlspecialchars($continuity['id']); ?>" method="POST" class="space-y-4">
-                    <p class="text-gray-700">¿Deseas continuar en este PAO?</p>
-                    <div class="flex items-center space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="professor_decision" value="1" required class="h-4 w-4 text-green-600 border-gray-300">
-                            <span class="ml-2 text-gray-700">Sí</span>
+                <?php if ($isProfessorDecisionMade): ?>
+                    <p class="text-green-600 mb-4 font-medium">
+                        Decisión registrada:
+                        <strong class="text-lg"><?= $continuity['professor_decision'] == 1 ? 'SÍ (Desea continuar)' : 'NO (No desea continuar)' ?></strong>
+                    </p>
+                <?php else: ?>
+                    <p class="text-yellow-600 mb-4 font-medium">Pendiente de la decisión del profesor.</p>
+                <?php endif; ?>
+
+                <!-- Formulario de Decisión del Profesor -->
+                <form action="<?= BASE_PATH ?>/continuity/update/<?= htmlspecialchars($continuity['id']) ?>" method="POST" class="space-y-4">
+                    <input type="hidden" name="update_field" value="professor_decision">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-8">
+                        <label class="block font-medium text-gray-700">
+                            ¿Deseas continuar en el siguiente PAO?
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="professor_decision" value="0" class="h-4 w-4 text-red-600 border-gray-300">
-                            <span class="ml-2 text-gray-700">No</span>
-                        </label>
+                        <div class="flex items-center space-x-6">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="professor_decision" value="1" class="form-radio h-5 w-5 text-indigo-600" required
+                                    <?= ($continuity['professor_decision'] == 1) ? 'checked' : '' ?>>
+                                <span class="ml-2 text-gray-800">Sí</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="professor_decision" value="0" class="form-radio h-5 w-5 text-indigo-600" required
+                                    <?= ($continuity['professor_decision'] === 0) ? 'checked' : '' ?>>
+                                <span class="ml-2 text-gray-800">No</span>
+                            </label>
+                        </div>
                     </div>
-                    <button type="submit" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150">
                         Enviar Decisión
                     </button>
                 </form>
-            <?php elseif ($isProfessor && $continuity['professor_decision'] !== null): ?>
-                <p class="mt-4 text-gray-700">Tu decisión ya ha sido registrada como
-                    <span class="font-bold <?php echo $continuity['professor_decision'] ? 'text-green-600' : 'text-red-600'; ?>">
-                        <?php echo $continuity['professor_decision'] ? 'SÍ' : 'NO'; ?>
-                    </span>.
-                </p>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
-            <?php if ($isDocencia && $continuity['docencia_decision'] === null && $continuity['professor_decision'] !== null): ?>
-                <h3 class="text-lg font-bold mb-2 mt-6">Decisión de Dirección de Docencia:</h3>
-                <form action="<?php echo BASE_PATH; ?>/continuity/update/<?php echo htmlspecialchars($continuity['id']); ?>" method="POST" class="space-y-4">
-                    <p class="text-gray-700">¿Aprobada la continuidad del profesor?</p>
-                    <div class="flex items-center space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="docencia_decision" value="1" required class="h-4 w-4 text-green-600 border-gray-300">
-                            <span class="ml-2 text-gray-700">Sí</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="docencia_decision" value="0" class="h-4 w-4 text-red-600 border-gray-300">
-                            <span class="ml-2 text-gray-700">No</span>
-                        </label>
+        <!-- 2. Decisión de Docencia/Talento Humano (Segundo Paso) -->
+        <?php if ($canViewEditDocenciaTHDecision): ?>
+            <div class="p-6 border rounded-xl shadow-lg transition-all duration-300 
+                    <?= $isProfessorDecisionMade ? 'bg-white border-green-200' : 'bg-gray-100 border-red-300 workflow-disabled' ?>">
+
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">2. Decisión de Docencia/Talento Humano</h2>
+
+                <?php if (!$isProfessorDecisionMade): ?>
+                    <div class="text-center p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        <p class="font-bold text-xl">¡Bloqueado!</p>
+                        <p>Esta decisión se habilitará automáticamente cuando el Profesor haya enviado su respuesta.</p>
                     </div>
-                    <button type="submit" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                        Registrar Decisión
-                    </button>
-                </form>
-            <?php endif; ?>
+                <?php else: ?>
+                    <?php if ($continuity['docencia_decision'] !== null): ?>
+                        <p class="text-green-600 mb-4 font-medium">
+                            Decisión Docencia/TH registrada:
+                            <strong class="text-lg"><?= $continuity['docencia_decision'] == 1 ? 'SÍ (Aprobado)' : 'NO (No Aprobado)' ?></strong>
+                            (Por: <?= htmlspecialchars($approvedBy['name'] ?? 'N/A') ?>)
+                        </p>
+                    <?php endif; ?>
 
-            <?php if ($isDocencia && $continuity['docencia_decision'] !== null): ?>
-                <p class="mt-4 text-gray-700">La decisión de Docencia ya ha sido registrada por 
-                    <span class="font-bold"><?php echo htmlspecialchars($approvedBy['name'] ?? 'N/A'); ?></span> como
-                    <span class="font-bold <?php echo $continuity['docencia_decision'] ? 'text-green-600' : 'text-red-600'; ?>">
-                        <?php echo $continuity['docencia_decision'] ? 'SÍ' : 'NO'; ?>
-                    </span>.
-                </p>
-            <?php endif; ?>
-        </main>
+                    <!-- Formulario de Decisión de Docencia/TH -->
+                    <form action="<?= BASE_PATH ?>/continuity/update/<?= htmlspecialchars($continuity['id']) ?>" method="POST" class="space-y-4 mt-6">
+                        <input type="hidden" name="update_field" value="docencia_decision">
+
+                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-8">
+                            <label class="block font-medium text-gray-700">
+                                ¿Aprobar la continuidad del profesor?
+                            </label>
+                            <div class="flex items-center space-x-6">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="docencia_decision" value="1" class="form-radio h-5 w-5 text-indigo-600" required
+                                        <?= ($continuity['docencia_decision'] == 1) ? 'checked' : '' ?>>
+                                    <span class="ml-2 text-gray-800">Sí</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="docencia_decision" value="0" class="form-radio h-5 w-5 text-indigo-600" required
+                                        <?= ($continuity['docencia_decision'] === 0) ? 'checked' : '' ?>>
+                                    <span class="ml-2 text-gray-800">No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150">
+                            Enviar Decisión Docencia/TH
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!$canViewEditProfessorDecision && !$canViewEditDocenciaTHDecision): ?>
+            <p class="text-center p-8 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
+                No tiene permisos para ver o editar las decisiones de continuidad para este registro.
+            </p>
+        <?php endif; ?>
     </div>
+
 </body>
+
 </html>

@@ -45,30 +45,79 @@ class ContinuityModel extends BaseModel
         return $stmt->execute();
     }
 
-    // Método para que el profesor actualice su decisión
-    public function updateProfessorDecision($id, $decision)
+    /**
+     * Actualiza dinámicamente la columna de decisión correspondiente (Profesor o Docencia).
+     * @param int $id ID de la continuidad.
+     * @param string $fieldToUpdate 'professor_decision' o 'docencia_decision'.
+     * @param int $decision El valor de la decisión (0 o 1).
+     * @param int|null $userId ID del usuario que aprueba (solo necesario para docencia).
+     * @return bool
+     */
+    public function updateDecisionDynamically($id, $fieldToUpdate, $decision, $userId = null)
+    {
+        if ($fieldToUpdate === 'professor_decision') {
+            return $this->processProfessorDecisionUpdate($id, $decision, $userId);
+        }
+
+        if ($fieldToUpdate === 'docencia_decision') {
+            return $this->processDocenciaDecisionUpdate($id, $decision, $userId);
+        }
+
+        return false; // Campo no válido
+    }
+
+    // Método interno para procesar la actualización del Profesor (Antiguo updateProfessorDecision)
+    private function processProfessorDecisionUpdate($id, $decision, $userId)
     {
         $query = "UPDATE " . $this->table . " SET professor_decision = ?, professor_decision_at = CURRENT_TIMESTAMP WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(1, $decision, PDO::PARAM_BOOL);
+        $stmt->bindParam(1, $decision, PDO::PARAM_INT); // Usar INT ya que es tinyint
         $stmt->bindParam(2, $id);
         return $stmt->execute();
     }
 
-    // Método para que Docencia actualice su decisión y el estado final
-    public function updateDocenciaDecision($id, $decision, $approvedBy)
+    // Método interno para procesar la actualización de Docencia (Antiguo updateDocenciaDecision)
+    private function processDocenciaDecisionUpdate($id, $decision, $approvedBy)
     {
-        // Obtener la decisión del profesor para calcular el estado final
+        // 1. Obtener la decisión del profesor para calcular el estado final
         $current = $this->find($id);
+
+        // El Super Administrador puede sobrescribir, así que usamos el valor del modelo si no se proporciona,
+        // pero para calcular el estado final, necesitamos la última decisión del profesor.
+        // NOTA: Para Super Admin, $current['professor_decision'] podría ser null. 
+        // Si el admin modifica docencia, asumimos que el estado final depende de la docencia_decision y de la professor_decision previa.
         $professorDecision = $current['professor_decision'];
-        $finalStatus = ($professorDecision && $decision) ? 'Retenido' : 'No Retenido';
+
+        // Lógica de Retención: Solo Retenido si AMBOS dicen SÍ (1)
+        $finalStatus = ($professorDecision == 1 && $decision == 1) ? 'Ractificado' : 'No Ractificado';
+
+        // Si la decisión de Docencia/TH es NO, y la del profesor fue SÍ, el estado final es 'No Ractificado'.
+        // Si ambas son NO, el estado final también es 'No Ractificado'.
+        // Si la del profesor es NULL, la lógica debería forzar a que no se pueda registrar, pero si el Admin lo hace:
+        if ($professorDecision === null && !$approvedBy) {
+            // Esto solo lo haría el Admin, pero es mejor que la lógica de la vista lo evite.
+            // Aquí forzamos 'No Ractificado' si la decisión del profesor es nula, salvo que sea Super Admin.
+            // Si el Admin aprueba la decisión de Docencia/TH sin que el profesor haya respondido, la lógica puede ser compleja.
+            // Mantendremos la lógica simple: si la Docencia/TH decide, el estado final se actualiza.
+        }
 
         $query = "UPDATE " . $this->table . " SET docencia_decision = ?, docencia_decision_by = ?, docencia_decision_at = CURRENT_TIMESTAMP, final_status = ? WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(1, $decision, PDO::PARAM_BOOL);
+        $stmt->bindParam(1, $decision, PDO::PARAM_INT); // Usar INT
         $stmt->bindParam(2, $approvedBy);
         $stmt->bindParam(3, $finalStatus);
         $stmt->bindParam(4, $id);
+
         return $stmt->execute();
+    }
+
+    // Se recomienda añadir un método findById para obtener todos los detalles de una sola continuidad
+    public function find($id)
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

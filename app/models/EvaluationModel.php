@@ -1,6 +1,8 @@
 <?php
 // app/models/EvaluationModel.php
 
+declare(strict_types=1); // Habilita la comprobación estricta de tipos
+
 require_once __DIR__ . '/BaseModel.php';
 
 class EvaluationModel extends BaseModel
@@ -53,7 +55,13 @@ class EvaluationModel extends BaseModel
         ]);
     }
 
-    public function getEvaluationsWithDetails()
+    /**
+     * Obtiene las evaluaciones con detalles, filtradas por rol de usuario.
+     * * @param int $userId El ID del usuario logueado.
+     * @param string $userRole El rol principal del usuario logueado.
+     * @return array
+     */
+    public function getEvaluationsWithDetails(int $userId, string $userRole): array
     {
         $query = "SELECT
                     e.id,
@@ -66,14 +74,49 @@ class EvaluationModel extends BaseModel
                     e.final_status,
                     e.initial_file_path,
                     e.signed_file_path,
-                    e.evaluation_date
+                    e.evaluation_date,
+                    e.professor_id as evaluation_professor_id
                   FROM " . $this->table . " e
                   JOIN users u_prof ON e.professor_id = u_prof.id
                   JOIN pao p ON e.pao_id = p.id
-                  JOIN users u_eval ON e.evaluator_id = u_eval.id
-                  ORDER BY e.evaluation_date DESC";
+                  JOIN users u_eval ON e.evaluator_id = u_eval.id";
+
+        $params = [];
+        $whereClause = "";
+
+        // Roles que tienen acceso irrestricto (pueden ver todas las evaluaciones)
+        $unrestrictedRoles = ['super administrador', 'coordinador académico', 'director de docencia'];
+
+        // Aplicación de la lógica de filtrado
+        // Si el rol NO está en la lista de irrestrictos, se aplica el filtro por ID.
+        if (!in_array(strtolower($userRole), $unrestrictedRoles)) {
+            // Los roles restringidos (como 'Profesor') solo ven sus propias evaluaciones.
+            $whereClause = " WHERE e.professor_id = ?";
+            $params[] = $userId;
+        }
+
+        $query .= $whereClause;
+        $query .= " ORDER BY e.evaluation_date DESC";
+
         $stmt = $this->db->prepare($query);
-        $stmt->execute();
+        $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtiene una evaluación por su ID.
+     * Se mantiene aquí para la verificación de permisos en el controlador.
+     */
+    public function find(int $id): array|false
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getLastInsertedId(): string
+    {
+        return $this->db->lastInsertId();
     }
 }
