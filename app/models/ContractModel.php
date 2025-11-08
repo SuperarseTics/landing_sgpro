@@ -46,7 +46,7 @@ class ContractModel extends BaseModel
                     c.document_path,
                     c.created_at,
                     u.name AS professor_name,
-                    pao.name AS pao_name
+                    pao.title AS pao_name
                   FROM " . $this->table . " c
                   JOIN users u ON c.professor_id = u.id
                   JOIN pao ON c.pao_id = pao.id

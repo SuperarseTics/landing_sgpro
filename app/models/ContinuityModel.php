@@ -24,7 +24,7 @@ class ContinuityModel extends BaseModel
                     c.professor_decision_at,
                     c.docencia_decision_at,
                     u.name AS professor_name,
-                    p.name AS pao_name,
+                    p.title AS pao_name,
                     ua.name AS docencia_approved_by_name
                   FROM " . $this->table . " c
                   JOIN users u ON c.professor_id = u.id

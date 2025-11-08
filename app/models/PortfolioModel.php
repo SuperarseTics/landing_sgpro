@@ -51,7 +51,7 @@ class PortfolioModel extends BaseModel
                 p.professor_id, 
                 u.name AS professor_name, 
                 p.pao_id, 
-                pa.name AS pao_name,
+                pa.title AS pao_name,
                 p.unit_number,
                 p.docencia_path,
                 p.practicas_path,
@@ -59,7 +59,7 @@ class PortfolioModel extends BaseModel
             FROM " . $this->table . " AS p
             JOIN users AS u ON p.professor_id = u.id
             JOIN pao AS pa ON p.pao_id = pa.id
-            ORDER BY u.name, pa.name, p.unit_number ASC
+            ORDER BY u.name, pa.title, p.unit_number ASC
         ";
 
         $stmt = $this->db->prepare($query);

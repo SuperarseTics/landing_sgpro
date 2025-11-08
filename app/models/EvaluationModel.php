@@ -66,7 +66,7 @@ class EvaluationModel extends BaseModel
         $query = "SELECT
                     e.id,
                     u_prof.name AS professor_name,
-                    p.name AS pao_name,
+                    p.title AS pao_name,
                     u_eval.name AS evaluator_name,
                     e.score,
                     e.comments,
@@ -108,7 +108,7 @@ class EvaluationModel extends BaseModel
      * Obtiene una evaluación por su ID.
      * Se mantiene aquí para la verificación de permisos en el controlador.
      */
-    public function find(int $id): array|false
+    public function find($id)
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = ?");
         $stmt->execute([$id]);

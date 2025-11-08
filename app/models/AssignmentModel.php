@@ -22,7 +22,7 @@ class AssignmentModel extends BaseModel
                     pa.created_at,
                     u.name AS professor_name,
                     s.name AS subject_name,
-                    p.name AS pao_name
+                    p.title AS pao_name
                   FROM " . $this->table . " pa
                   JOIN users u ON pa.professor_id = u.id
                   JOIN subjects s ON pa.subject_id = s.id

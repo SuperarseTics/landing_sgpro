@@ -44,7 +44,7 @@
                                     <?php echo htmlspecialchars($pao['id']); ?>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <?php echo htmlspecialchars($pao['name']); ?>
+                                    <?php echo htmlspecialchars($pao['title']); ?>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <?php echo htmlspecialchars($pao['start_date']); ?>

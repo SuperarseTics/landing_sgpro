@@ -39,7 +39,7 @@ class InvoiceModel extends BaseModel {
                     i.status,
                     i.payment_proof_path,
                     u.name AS professor_name,
-                    pao.name AS pao_name
+                    pao.title AS pao_name
                   FROM invoices i
                   JOIN users u ON i.professor_id = u.id
                   JOIN pao ON i.pao_id = pao.id";

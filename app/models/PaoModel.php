@@ -12,16 +12,15 @@ class PaoModel extends BaseModel
         parent::__construct();
     }
 
-    // El método getAll() ya está definido en BaseModel
 
-    public function create($name, $start_date, $end_date)
+    public function create($title, $start_date, $end_date)
     {
-        $query = "INSERT INTO " . $this->table . " (name, start_date, end_date) VALUES (?, ?, ?)";
+        $query = "INSERT INTO " . $this->table . " (title, start_date, end_date) VALUES (?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
 
         // Limpieza y asignación de datos
-        $stmt->bindParam(1, $name);
+        $stmt->bindParam(1, $title);
         $stmt->bindParam(2, $start_date);
         $stmt->bindParam(3, $end_date);
 
