@@ -35,7 +35,7 @@
                         <option value="">Seleccione un PAO</option>
                         <?php foreach ($paos as $pao): ?>
                             <option value="<?php echo htmlspecialchars($pao['id']); ?>">
-                                <?php echo htmlspecialchars($pao['name']); ?>
+                                <?php echo htmlspecialchars($pao['title']); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
